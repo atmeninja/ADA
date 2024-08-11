@@ -1,51 +1,47 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
 
 struct Item {
     int weight;
     int value;
 };
 
-// Comparison function for sorting items based on value per unit weight
-int compare(const void* a, const void* b) {
-    double ratioA = (double)((struct Item*)a)->value / ((struct Item*)a)->weight;
-    double ratioB = (double)((struct Item*)b)->value / ((struct Item*)b)->weight;
-    return (ratioA < ratioB) - (ratioA > ratioB);
-}
-
-// Function to solve discrete knapsack using greedy approach
-int discreteKnapsack(struct Item* items, int n, int capacity) {
-    qsort(items, n, sizeof(struct Item), compare);
+int discreteKnapsack(vector<Item>& items, int capacity) {
+    sort(items.begin(), items.end(), [](const Item& a, const Item& b) {
+        return (double)a.value / a.weight > (double)b.value / b.weight;
+    });
 
     int totalValue = 0;
     int currentWeight = 0;
 
-    // Fill the knapsack with items
-    for (int i = 0; i < n; i++) {
-        if (currentWeight + items[i].weight <= capacity) {
-            currentWeight += items[i].weight;
-            totalValue += items[i].value;
+    for (const Item& item : items) {
+        if (currentWeight + item.weight <= capacity) {
+            currentWeight += item.weight;
+            totalValue += item.value;
         }
     }
 
     return totalValue;
 }
 
-// Function to solve continuous knapsack using greedy approach
-double continuousKnapsack(struct Item* items, int n, int capacity) {
-    qsort(items, n, sizeof(struct Item), compare);
+double continuousKnapsack(vector<Item>& items, int capacity) {
+    sort(items.begin(), items.end(), [](const Item& a, const Item& b) {
+        return (double)a.value / a.weight > (double)b.value / b.weight;
+    });
 
     double totalValue = 0.0;
     int currentWeight = 0;
 
-    // Fill the knapsack with items fractionally
-    for (int i = 0; i < n; i++) {
-        if (currentWeight + items[i].weight <= capacity) {
-            currentWeight += items[i].weight;
-            totalValue += items[i].value;
+    for (const Item& item : items) {
+        if (currentWeight + item.weight <= capacity) {
+            currentWeight += item.weight;
+            totalValue += item.value;
         } else {
             int remainingCapacity = capacity - currentWeight;
-            totalValue += (double)items[i].value / items[i].weight * remainingCapacity;
+            totalValue += (double)item.value / item.weight * remainingCapacity;
             break;
         }
     }
@@ -54,32 +50,27 @@ double continuousKnapsack(struct Item* items, int n, int capacity) {
 }
 
 int main() {
+    vector<Item> items;
     int n, capacity;
 
-    // Input number of items and capacity of knapsack
-    printf("Enter the number of items: ");
-    scanf("%d", &n);
-    printf("Enter the capacity of knapsack: ");
-    scanf("%d", &capacity);
+    cout << "Enter the number of items: ";
+    cin >> n;
+    cout << "Enter the capacity of knapsack: ";
+    cin >> capacity;
 
-    struct Item* items = (struct Item*)malloc(n * sizeof(struct Item));
-
-    // Input the weight and value of each item
-    printf("Enter the weight and value of each item:\n");
+    cout << "Enter the weight and value of each item:" << endl;
     for (int i = 0; i < n; i++) {
-        printf("Item %d: ", i + 1);
-        scanf("%d %d", &items[i].weight, &items[i].value);
+        Item item;
+        cout << "Item " << i + 1 << ": ";
+        cin >> item.weight >> item.value;
+        items.push_back(item);
     }
 
-    // Solve discrete knapsack problem
-    int discreteResult = discreteKnapsack(items, n, capacity);
-    printf("Maximum value for discrete knapsack: %d\n", discreteResult);
+    int discreteResult = discreteKnapsack(items, capacity);
+    cout << "Maximum value for discrete knapsack: " << discreteResult << endl;
 
-    // Solve continuous knapsack problem
-    double continuousResult = continuousKnapsack(items, n, capacity);
-    printf("Maximum value for continuous knapsack: %.2f\n", continuousResult);
+    double continuousResult = continuousKnapsack(items, capacity);
+    cout << "Maximum value for continuous knapsack: " << continuousResult << endl;
 
-    free(items);
     return 0;
 }
-
